@@ -11,13 +11,13 @@ services:
         RUN pnpm install --frozen-lockfile
         COPY . .
         
-        # Аккуратно убираем импорты фоновых картинок (они ломают сборку из-за Git LFS)
+        # Убираем импорты фоновых картинок и даём массиву правильный тип
         RUN node -e " \
           const fs = require('fs'); \
           let c = fs.readFileSync('lib/CameraSettings.tsx', 'utf8'); \
           c = c.replace(/import Desk from [^;]+;/g, ''); \
           c = c.replace(/import Nature from [^;]+;/g, ''); \
-          c = c.replace(/const BACKGROUND_IMAGES = \[[\s\S]*?\];/, 'const BACKGROUND_IMAGES = [];'); \
+          c = c.replace(/const BACKGROUND_IMAGES = \[[\s\S]*?\];/, 'const BACKGROUND_IMAGES: { name: string; path: { src: string } }[] = [];'); \
           fs.writeFileSync('lib/CameraSettings.tsx', c); \
         "
         

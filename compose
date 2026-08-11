@@ -30,8 +30,6 @@ services:
         EXPOSE 3000
         CMD ["pnpm", "start"]
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       - LIVEKIT_API_KEY
       - LIVEKIT_API_SECRET

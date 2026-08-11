@@ -11,12 +11,15 @@ services:
         RUN pnpm install --frozen-lockfile
         COPY . .
         
-        # Удаляем папку с картинками
-        RUN rm -rf public/background-images
-        
-        # Патчим код — убираем импорты фоновых изображений
-        RUN sed -i "/background-images/d" lib/CameraSettings.tsx || true
-        RUN sed -i "/BackgroundImage/d" lib/CameraSettings.tsx || true
+        # Аккуратно убираем импорты фоновых картинок (они ломают сборку из-за Git LFS)
+        RUN node -e " \
+          const fs = require('fs'); \
+          let c = fs.readFileSync('lib/CameraSettings.tsx', 'utf8'); \
+          c = c.replace(/import Desk from [^;]+;/g, ''); \
+          c = c.replace(/import Nature from [^;]+;/g, ''); \
+          c = c.replace(/const BACKGROUND_IMAGES = \[[\s\S]*?\];/, 'const BACKGROUND_IMAGES = [];'); \
+          fs.writeFileSync('lib/CameraSettings.tsx', c); \
+        "
         
         RUN pnpm build
 

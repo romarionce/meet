@@ -6,12 +6,17 @@ services:
         FROM node:20-alpine AS builder
         WORKDIR /app
         RUN npm install -g pnpm
+        
         COPY package.json pnpm-lock.yaml* ./
         RUN pnpm install --frozen-lockfile
         COPY . .
         
-        # Удаляем проблемные картинки, чтобы build не падал
-        RUN rm -rf public/background-images || true
+        # Удаляем папку с картинками
+        RUN rm -rf public/background-images
+        
+        # Патчим код — убираем импорты фоновых изображений
+        RUN sed -i "/background-images/d" lib/CameraSettings.tsx || true
+        RUN sed -i "/BackgroundImage/d" lib/CameraSettings.tsx || true
         
         RUN pnpm build
 
